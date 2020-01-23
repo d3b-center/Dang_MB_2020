@@ -1,0 +1,21 @@
+# mcp_counter
+polya <- '~/Projects/OpenPBTA-analysis/data/pbta-gene-expression-rsem-fpkm-collapsed.polya.rds'
+stranded <- '~/Projects/OpenPBTA-analysis/data/pbta-gene-expression-rsem-fpkm-collapsed.stranded.rds'
+clin.file <- '~/Projects/OpenPBTA-analysis/data/pbta-histologies.tsv'
+deconv.method <- 'mcp_counter'
+cibersort_bin <- '' 
+cibersort_mat <- '' 
+output.file <- 'results/deconv-output-mcpcounter.RData'
+deconvout <- 'results/deconv-output-mcpcounter.RData'
+output <- 'results/deconv-summary-mcpcounter.pdf'
+
+# cibersort
+polya <- '~/Projects/OpenPBTA-analysis/data/pbta-gene-expression-rsem-fpkm-collapsed.polya.rds'
+stranded <- '~/Projects/OpenPBTA-analysis/data/pbta-gene-expression-rsem-fpkm-collapsed.stranded.rds'
+clin.file <- '~/Projects/OpenPBTA-analysis/data/pbta-histologies.tsv'
+deconv.method <- 'cibersort_abs'
+cibersort_bin <- '~/Projects/OpenPBTA-analysis/analyses/immune-deconv/CIBERSORT.R' 
+cibersort_mat <- '~/Projects/OpenPBTA-analysis/analyses/immune-deconv/LM22.txt' 
+output.file <- 'results/deconv-output.RData'
+deconvout <- 'results/deconv-output.RData'
+output <- 'results/deconv-summary.pdf'
