@@ -27,16 +27,6 @@ option_list <- list(
               help = "Deconv Output (.RData)")
 )
 
-# Example Run:
-# Rscript analyses/immune-deconv/01-immune-deconv.R \
-# -p 'data/pbta-gene-expression-rsem-fpkm-collapsed.polya.rds' \
-# -s 'data/pbta-gene-expression-rsem-fpkm-collapsed.stranded.rds' \
-# -c 'data/pbta-histologies.tsv' \
-# -m $DECONV_METHOD \
-# -b $CIBERSORT_BIN \
-# -g $CIBERSORT_MAT \
-# -o 'analyses/immune-deconv/results/deconv-output.RData'
-
 # parse parameters
 opt <- parse_args(OptionParser(option_list = option_list))
 polya <- opt$polyaexprs

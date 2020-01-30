@@ -18,11 +18,6 @@ option_list <- list(
               help = "Output PDF (.pdf)")
 )
 
-# Example Run:
-# Rscript summary.R \
-# -i 'results/deconv-output.RData' \
-# -o 'results/deconv-summary.pdf'
-
 # parse parameters
 opt <- parse_args(OptionParser(option_list = option_list))
 deconvout <- opt$input
