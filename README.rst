@@ -25,7 +25,8 @@ Run the full analysis using:
 Estimation of micoglia and monocyte relative cell proportion
 =====================================================================
 
-### Description:
+Description:
+------------
 
 We used (BRETIGEA)[https://github.com/andymckenzie/BRETIGEA] to find surrogate proportion variables (SPV) of brain cells astrocytes (ast), endothelial cells (end) , microglia (mic) , neurons (neu) , oligodendrocytes (oli) , and oligodendrocyte precursor cells (opc) , derived from each of human, mice, and combination human/mouse data sets.
 
@@ -35,8 +36,10 @@ We ran function findCells() using SVD method to calculate SPVs and all 1000 mark
 
 `medullo_micro_mono.R`: runs BRETIGEA cell proportion estimation for all subtypes then plots for distribution of relative cell proportion of mococytes and microglia in each medulloblastoma subgroup
 
-### Run
+Run
+---
     bash run_bretigea.sh
 
-### Plots
+Plots
+-----
 (Dropbox)[https://www.dropbox.com/sh/hmycsb64ymcc3xm/AAC2PljTFXPTs2Z0GTr_bB-4a?dl=0]
