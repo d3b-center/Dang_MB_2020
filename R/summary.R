@@ -26,7 +26,11 @@ load(deconvout)
 
 # split results of method 1 and 2
 method1 <- as.data.frame(deconv.res[,1])
+method1 <- method1 %>%
+  mutate(molecular_subtype = mb_classifier_prediction)
 method2 <- as.data.frame(deconv.res[,2])
+method2 <- method2 %>%
+  mutate(molecular_subtype = mb_classifier_prediction)
 
 # extract names of the methods used
 method1.name <- colnames(deconv.res)[1]
@@ -76,11 +80,12 @@ method2.sub <- method2 %>%
   filter(cell_type %in% common.types) %>%
   mutate(!!method2.name := fraction) %>%
   select(-c(method, fraction))
-total <- merge(method1.sub, method2.sub, by = c("sample","cell_type", "short_histology","molecular_subtype","tumor_descriptor"))
+common.cols <- intersect(colnames(method1.sub), colnames(method2.sub))
+total <- merge(method1.sub, method2.sub, by = common.cols)
 
 # Overall correlation: 0.12
 avg.cor <- round(cor(total[,method1.name], total[,method2.name]), 2)
-print(paste("Overall Pearson Correlation: ", avg.cor)) # 0.04
+print(paste("Overall Pearson Correlation: ", avg.cor))
 
 # labels
 total.labels <- total %>%

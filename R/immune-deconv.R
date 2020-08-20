@@ -57,9 +57,7 @@ expr.input <- cbind(polya, stranded)
 # read clinical data
 clin <- read.delim(clin.file, stringsAsFactors = F)
 clin  <- clin %>% 
-  filter(Kids_First_Biospecimen_ID %in% colnames(expr.input)) %>%
-  filter(short_histology == "Medulloblastoma") %>%
-  select(Kids_First_Biospecimen_ID, short_histology, molecular_subtype, tumor_descriptor)
+  filter(Kids_First_Biospecimen_ID %in% colnames(expr.input))
 
 # function to run immunedeconv
 deconv <- function(expr.input, method){
