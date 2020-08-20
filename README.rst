@@ -48,6 +48,7 @@ Analysis:
 Run the full analysis using:
 
 .. code-block:: bash
+
     bash run_bretigea.sh
 
 Plots
