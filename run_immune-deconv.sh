@@ -1,5 +1,5 @@
 # run mcp-counter 
-Rscript --vanilla R/immune-deconv.R \
+Rscript --vanilla code/immune-deconv.R \
 -p data/pbta-gene-expression-rsem-fpkm-collapsed.polya.rds \
 -s data/pbta-gene-expression-rsem-fpkm-collapsed.stranded.rds \
 -c data/pbta_mb_subtypes.tsv \
@@ -8,12 +8,12 @@ Rscript --vanilla R/immune-deconv.R \
 -g NA \
 -o results/deconv-output-mcpcounter.RData
 
-Rscript --vanilla R/summary.R \
+Rscript --vanilla code/summary.R \
 -i results/deconv-output-mcpcounter.RData \
 -o results/deconv-summary-mcpcounter.pdf
 
 # run cibersort
-Rscript --vanilla R/immune-deconv.R \
+Rscript --vanilla code/immune-deconv.R \
 -p data/pbta-gene-expression-rsem-fpkm-collapsed.polya.rds \
 -s data/pbta-gene-expression-rsem-fpkm-collapsed.stranded.rds \
 -c data/pbta_mb_subtypes.tsv \
@@ -22,6 +22,6 @@ Rscript --vanilla R/immune-deconv.R \
 -g ~/Projects/OpenPBTA-analysis/analyses/immune-deconv/LM22.txt \
 -o results/deconv-output-cibersort.RData
 
-Rscript --vanilla R/summary.R \
+Rscript --vanilla code/summary.R \
 -i results/deconv-output-cibersort.RData \
 -o results/deconv-summary-cibersort.pdf
