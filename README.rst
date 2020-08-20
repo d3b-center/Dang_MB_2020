@@ -51,6 +51,6 @@ Run the full analysis using:
 
     bash run_bretigea.sh
 
-Plots
+Plots:
 -----
 https://www.dropbox.com/sh/hmycsb64ymcc3xm/AAC2PljTFXPTs2Z0GTr_bB-4a?dl=0
