@@ -42,8 +42,12 @@ We ran function findCells() using SVD method to calculate SPVs and all 1000 mark
 
 `medullo_micro_mono.R`: runs BRETIGEA cell proportion estimation for all subtypes then plots for distribution of relative cell proportion of mococytes and microglia in each medulloblastoma subgroup
 
-Run
----
+Analysis:
+---------
+
+Run the full analysis using:
+
+.. code-block:: bash
     bash run_bretigea.sh
 
 Plots
