@@ -18,6 +18,6 @@ Analysis:
 
 Run the full analysis using:
 
-.. .. code-block:: bash
+.. code-block:: bash
 
     bash run_immune-deconv.sh
