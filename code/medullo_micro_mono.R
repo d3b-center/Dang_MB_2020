@@ -119,6 +119,28 @@ tiff("plots/medullo_micro_mono_init_cells_bw.tiff",width = 2000,height = 1600,re
 ggplot(cell_type_proportions_micro_mono_init,aes(x=Var2,y=value))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+scale_fill_grey()+geom_point(aes(shape=tumor_descriptor),size=1 ,position = position_jitterdodge())+ylim(-0.5,0.5)
 dev.off()
 
+# microglia and monocyte cell proportions in subtypes with enough recurrent/progressive and initial tumor CNS
+subtypes_with_prog<-unique(cell_type_proportions_micro_mono_prog$molecular_subtype)
+
+# merge init and prog samples from molecular_subtypes in subtypes_with_prog
+cell_type_proportions_micro_mono_prog<-rbind(cell_type_proportions_micro_mono_prog,cell_type_proportions_micro_mono_init %>% filter(molecular_subtype %in% subtypes_with_prog))
+
+pdf("plots/medullo_micro_mono_init_prog_cells.pdf",width = 16,height = 8)
+ggplot(cell_type_proportions_micro_mono_prog,aes(x=Var2,y=value,shape=tumor_descriptor))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype,ncol = 1)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS and  (>=6) progressive CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+geom_point(aes(color=tumor_descriptor),size=3 ,position = position_jitterdodge())+ylim(-0.5,0.5)
+dev.off()
+
+tiff("plots/medullo_micro_mono_init_prog_cells.tiff",width = 2500,height = 1200,res=150)
+ggplot(cell_type_proportions_micro_mono_prog,aes(x=Var2,y=value,shape=tumor_descriptor))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype,ncol = 1)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS and  (>=6) progressive CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+geom_point(aes(color=tumor_descriptor),size=3 ,position = position_jitterdodge())+ylim(-0.5,0.5)
+dev.off()
+
+# black and white
+pdf("plots/medullo_micro_mono_init_prog_cells_bw.pdf",width = 16,height = 8)
+ggplot(cell_type_proportions_micro_mono_prog,aes(x=Var2,y=value,shape=tumor_descriptor))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype,ncol = 1)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS and  (>=6) progressive CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+scale_fill_grey()+geom_point( size=3,position = position_jitterdodge(),color="black")+ylim(-0.5,0.5)
+dev.off()
+
+tiff("plots/medullo_micro_mono_init_prog_cells_bw.tiff",width = 2500,height = 1200,res=150)
+ggplot(cell_type_proportions_micro_mono_prog,aes(x=Var2,y=value,shape=tumor_descriptor))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype,ncol = 1)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS and  (>=6) progressive CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+scale_fill_grey()+geom_point( size=3,position = position_jitterdodge(),color="black")+ylim(-0.5,0.5)
+dev.off()
 
 
 
