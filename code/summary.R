@@ -13,10 +13,14 @@ source('../Utils/pubTheme.R')
 
 option_list <- list(
   make_option(c("-i", "--input"), type = "character",
-              help = "Immunedeconv output from 01-immune.deconv.R (.RData)"),
-  make_option(c("-o", "--output"), type = "character",
-              help = "Output PDF (.pdf)")
+              help = "Immunedeconv output from 01-immune.deconv.R (.RData)")
 )
+
+# output directory
+root_dir <- rprojroot::find_root(rprojroot::has_dir(".git"))
+outputDir <- file.path(root_dir, "results", "immune-deconv")
+source(file.path(root_dir, "util", "corrplot.R"))
+source(file.path(root_dir, "util", "create_heatmap.R"))
 
 # parse parameters
 opt <- parse_args(OptionParser(option_list = option_list))
@@ -24,100 +28,18 @@ deconvout <- opt$input
 output <- opt$output
 load(deconvout) 
 
-# split results of method 1 and 2
-method1 <- as.data.frame(deconv.res[,1])
-method1 <- method1 %>%
-  mutate(molecular_subtype = mb_classifier_prediction)
-method2 <- as.data.frame(deconv.res[,2])
-method2 <- method2 %>%
-  mutate(molecular_subtype = mb_classifier_prediction)
+# methods
+methods <- unique(deconv.res$method)
 
-# extract names of the methods used
-method1.name <- colnames(deconv.res)[1]
-method2.name <- colnames(deconv.res)[2]
+# plot correlation plots between all combination of methods used
+methods.comb <- combn(methods, m = 2, simplify = FALSE) 
+lapply(methods.comb, 
+       FUN = plot.corrplot, 
+       deconv.out.format = deconv.res, 
+       outputDir = outputDir)  
 
-# first, define a function to create heatmap of
-# average immune scores per histology per cell type
-create.heatmap <- function(deconv.method, title) {
-  
-  # create labels: count of samples per histology
-  annot <- deconv.method %>%
-    select(molecular_subtype, sample) %>%
-    unique() %>%
-    group_by(molecular_subtype) %>%
-    summarise(label = n()) %>%
-    mutate(label = paste0(molecular_subtype,' (',label,')'))
-  
-  # add labels to actual data
-  deconv.method <- merge(deconv.method, annot, by = 'molecular_subtype')
-  
-  # calculate average scores per cell type per histology
-  deconv.method <- deconv.method %>% 
-    filter(!cell_type %in% c("microenvironment score", "stroma score", "immune score")) %>%
-    group_by(cell_type, label) %>%
-    summarise(mean = mean(fraction)) %>%
-    # convert into matrix of cell type vs histology
-    spread(key = label, value = mean) %>% 
-    column_to_rownames('cell_type')
-  
-  # remove rows with all zeros (not allowed because we are scaling by row)
-  deconv.method <- deconv.method[apply(deconv.method, 1, function(x) !all(x==0)),]
-  
-  title <- paste0(title,"\nAverage immune scores normalized by rows")
-  pheatmap(mat = t(deconv.method), fontsize = 10, 
-           scale = "column", angle_col = 45,
-           main = title, annotation_legend = T, cellwidth = 15, cellheight = 15)
-}
-
-# next, plot a correlation heatmap between xCell and the second specified method
-# only take common cell types between both methods
-common.types <- intersect(method1$cell_type, method2$cell_type) 
-method1.sub <- method1 %>%
-  filter(cell_type %in% common.types) %>%
-  mutate(!!method1.name := fraction) %>%
-  select(-c(method, fraction))
-method2.sub <- method2 %>%
-  filter(cell_type %in% common.types) %>%
-  mutate(!!method2.name := fraction) %>%
-  select(-c(method, fraction))
-common.cols <- intersect(colnames(method1.sub), colnames(method2.sub))
-total <- merge(method1.sub, method2.sub, by = common.cols)
-
-# Overall correlation: 0.12
-avg.cor <- round(cor(total[,method1.name], total[,method2.name]), 2)
-print(paste("Overall Pearson Correlation: ", avg.cor))
-
-# labels
-total.labels <- total %>%
-  select(molecular_subtype, sample) %>%
-  unique() %>%
-  group_by(molecular_subtype) %>%
-  dplyr::summarise(label = n()) %>%
-  mutate(label = paste0(molecular_subtype,' (',label,')'))
-
-# add labels to actual data
-total <- merge(total, total.labels, by = 'molecular_subtype')
-
-# calculate correlation per cell type per histology
-total <- total %>% 
-  group_by(cell_type, label) %>%
-  dplyr::summarise(corr = cor(!!sym(method1.name), !!sym(method2.name))) %>%
-  spread(key = label, value = corr) %>% 
-  column_to_rownames('cell_type') %>%
-  replace(is.na(.), 0)
-
-# create correlation heatmap
-pdf(file = output, onefile = TRUE, width = 13, height = 8)
-corrplot(t(total), method = "circle", type = 'full', win.asp = 0.5, 
-         addCoef.col = "black", number.cex = .5,
-         is.corr = FALSE, tl.cex = 0.8, mar = c(0, 0, 0, 5), 
-         title = paste0("\n\n\n\nCorrelation matrix (", 
-                        method1.name, " vs ", method2.name, ")\n",
-                        "Overall Pearson Correlation: ", avg.cor))
-
-# lastly, create heatmaps for both deconvolution methods
-# add to the same file as above
-create.heatmap(deconv.method = method1, title = method1.name)
-create.heatmap(deconv.method = method2, title = method2.name)
-dev.off()
-
+# create heatmaps for all deconvolution methods
+lapply(methods, 
+       FUN = create.heatmap, 
+       deconv.out.format = deconv.res,
+       outputDir = outputDir)

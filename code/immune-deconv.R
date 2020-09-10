@@ -37,10 +37,24 @@ cibersort_bin <- opt$cibersortbin
 cibersort_mat <- opt$cibersortgenemat 
 output.file <- opt$outputfile
 
-print(cibersort_bin)
-print(cibersort_mat)
+# for multiple methods, convert to character vector
+deconv.method <- trimws(strsplit(deconv.method,",")[[1]]) 
+
+# TIMER specifically for adult and needs specification on what tumor type it is
+# so we will remove it from the recommended methods
+rec_methods <- grep('timer', deconvolution_methods, invert = TRUE, value = TRUE)
+
+# Check model parameter - must be in recommended methods (immunedeconv accepted options)
+if (!is.null(deconv.method)){
+  if (!(all(deconv.method %in% rec_methods))) {
+    stop( paste(c("Error: Specified method not available. Must be one of the following: ", rec_methods), collapse=" ") )
+  }
+}
+
 # if cibersort_bin and cibersort_mat are defined
 # then, set path to cibersort binary and matrix
+print(cibersort_bin)
+print(cibersort_mat)
 if(cibersort_bin != "NA" & cibersort_mat != "NA"){
   set_cibersort_binary(cibersort_bin)
   set_cibersort_mat(cibersort_mat)
@@ -79,11 +93,13 @@ deconv <- function(expr.input, method){
   return(res)
 }
 
-# Deconvolute using xCell and Cibersort (absolute mode)
-# these two methods have the max number of immune cell types
-deconv.method <- c("xcell", deconv.method)
-deconv.method <- grep(paste0(deconv.method, collapse = "|"), deconvolution_methods, value = TRUE)
-deconv.res <- sapply(deconv.method, function(x) deconv(expr.input, method = x), simplify = "list")
+# deconvolute using method(s) of choice
+deconv.res <- lapply(deconv.method, FUN = function(x) 
+  deconv(expr.input = expr.input, 
+         method = x))
+
+# combine results from one or more methods
+deconv.res <- do.call(rbind.data.frame, deconv.res) 
 
 # save output to RData object 
 print("Writing output to file..")
