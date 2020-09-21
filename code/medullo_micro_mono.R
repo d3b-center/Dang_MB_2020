@@ -153,14 +153,50 @@ cell_type_proportions$tumor_descriptor[which(cell_type_proportions$tumor_descrip
 cell_type_proportions_init<-cell_type_proportions %>% filter(tumor_descriptor =="Initial CNS Tumor")
 cell_type_proportions_prog<-cell_type_proportions %>% filter(tumor_descriptor =="Progressive/Recurrence")  
   
-pdf("plots/medullo_all_brain_cells.pdf",width = 25,height = 10)
-ggplot(cell_type_proportions,aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+geom_bar(stat = "identity")+xlab("Sample")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("All brain cells in BRETIGEA compared for all CNS in subtypes")+theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+guides(fill=guide_legend(title="cell types"))+ scale_fill_brewer(palette = "Set2")
-dev.off()
 
-tiff("plots/medullo_all_brain_cells.tiff",width = 3500,height = 1200,res=150)
-ggplot(cell_type_proportions,aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+geom_bar(stat = "identity")+xlab("Sample")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("All brain cells in BRETIGEA compared for all CNS in subtypes")+theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+guides(fill=guide_legend(title="cell types"))
-dev.off()
+Group3 <- ggplot(cell_type_proportions
+                 [which(cell_type_proportions$molecular_subtype=="Group3"),],
+                 aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+
+  geom_bar(stat = "identity")+xlab("Sample")+
+  ylab("Surrogate proportion variables (SPV)")+theme_Publication()+
+  theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+
+  guides(fill=guide_legend(title="cell types"))+ scale_fill_brewer(palette = "Set2")+
+  scale_y_continuous(limits = c(-0.4,1)) +
+  facet_wrap(~molecular_subtype)
 
+Group4 <- ggplot(cell_type_proportions
+                 [which(cell_type_proportions$molecular_subtype=="Group4"),],
+                 aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+
+  geom_bar(stat = "identity")+xlab("Sample")+
+  ylab("Surrogate proportion variables (SPV)")+theme_Publication()+
+  theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+
+  guides(fill=guide_legend(title="cell types"))+ scale_fill_brewer(palette = "Set2")+
+  scale_y_continuous(limits = c(-0.4,1)) +
+  facet_wrap(~molecular_subtype)
+
+SHH <- ggplot(cell_type_proportions
+              [which(cell_type_proportions$molecular_subtype=="SHH"),],
+              aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+
+  geom_bar(stat = "identity")+xlab("Sample")+
+  ylab("Surrogate proportion variables (SPV)")+theme_Publication()+
+  theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+
+  guides(fill=guide_legend(title="cell types"))+ scale_fill_brewer(palette = "Set2")+
+  scale_y_continuous(limits = c(-0.4,1)) +
+  facet_wrap(~molecular_subtype)
+
+WNT <- ggplot(cell_type_proportions
+              [which(cell_type_proportions$molecular_subtype=="WNT"),],
+              aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+
+  geom_bar(stat = "identity")+xlab("Sample")+
+  ylab("Surrogate proportion variables (SPV)")+theme_Publication()+
+  theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+
+  guides(fill=guide_legend(title="cell types"))+ scale_fill_brewer(palette = "Set2")+
+  scale_y_continuous(limits = c(-0.4,1))+
+  facet_wrap(~molecular_subtype)
+  
+ggarrange(Group3,Group4,SHH,WNT,nrow = 1,widths = c(1,2,1.25,0.6),common.legend = TRUE,legend = "left") +ggsave("plots/medullo_all_brain_cells.pdf",width = 25,height = 10,units = "in")
+
+ggarrange(Group3,Group4,SHH,WNT,nrow = 1,widths = c(1,2,1.25,0.6),common.legend = TRUE,legend = "left") +ggsave("plots/medullo_all_brain_cells.tiff",width = 25,height = 10,units = "in")
 
 
 write.table(markers_df_brain,"data/analyzed/marker_df_brain.tsv",sep="\t",quote = FALSE,row.names = FALSE)
