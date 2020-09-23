@@ -9,6 +9,7 @@ library(ggplot2)
 library(ggpubr)
 library(tidyverse)
 library(forcats)
+library(RColorBrewer)
 
 theme_Publication <- function(base_size=16, base_family="Helvetica") {
   library(grid)
@@ -51,7 +52,7 @@ overlapgenes<-rownames(exp_stranded[which(rownames(exp_stranded) %in% rownames(e
 exp<-cbind(exp_stranded[overlapgenes,],exp_polya[overlapgenes,])
 
 #clinical v13
-clinical <- read_tsv("data/raw/rathi_results.tsv")
+clinical_medullo <- read_tsv("data/raw/pbta_mb_subtypes.tsv")
 # xcell monoctype marker cells
 gene_marker<-read_tsv("data/raw/13059_2017_1349_MOESM3_ESM.txt") 
 monocyte_marker<-gene_marker[grep("Monocyte",gene_marker$Celltype_Source_ID),] %>% dplyr::select(-c(`# of genes`,Celltype_Source_ID)) %>% as.data.frame() %>% t() 
@@ -60,12 +61,6 @@ monocyte_marker<-unique(monocyte_marker$value)
 monocyte_marker<-monocyte_marker[!is.na(monocyte_marker)]
 
 
-
-
-# all clinical info for medullo samples
-# pbta
-pbta<-read_tsv("data/raw/pbta-histologies.tsv") %>% dplyr::select(c("Kids_First_Biospecimen_ID","sample_id","RNA_library","tumor_descriptor"))
-clinical_medullo<-clinical %>% left_join(pbta,by=c("Kids_First_Biospecimen_ID","sample_id","RNA_library"))
 #%>% filter(experimental_strategy=="RNA-Seq" & disease_type_new=="Medulloblastoma")
 exp<-exp[,which(colnames(exp) %in% clinical_medullo$Kids_First_Biospecimen_ID)]
 
@@ -92,58 +87,116 @@ cell_type_proportions_micro_mono$tumor_descriptor[which(cell_type_proportions_mi
 cell_type_proportions_micro_mono<-cell_type_proportions_micro_mono[-which(cell_type_proportions_micro_mono$tumor_descriptor=="Unavailable"),]
 
 # count
-count<-table(cell_type_proportions_micro_mono[,c("mb_classifier_prediction","tumor_descriptor")]) %>% as.data.frame()
+count<-table(cell_type_proportions_micro_mono[,c("molecular_subtype","tumor_descriptor")]) %>% as.data.frame()
 count<-count[which(count$Freq>=6),]
 
 # keep only types which have more than 6 counts
 cell_type_proportions_micro_mono_prog<-cell_type_proportions_micro_mono %>%
   filter(tumor_descriptor =="Progressive/Recurrence" &
-           mb_classifier_prediction %in% count[which(count$Freq>=6 & count$tumor_descriptor=="Progressive/Recurrence"),"mb_classifier_prediction"])
+           molecular_subtype %in% count[which(count$Freq>=6 & count$tumor_descriptor=="Progressive/Recurrence"),"molecular_subtype"])
 
 cell_type_proportions_micro_mono_init<-cell_type_proportions_micro_mono %>%
   filter(tumor_descriptor =="Initial CNS Tumor" &
-           mb_classifier_prediction %in% count[which(count$Freq>=6 & count$tumor_descriptor=="Initial CNS Tumor"),"mb_classifier_prediction"])
+           molecular_subtype %in% count[which(count$Freq>=6 & count$tumor_descriptor=="Initial CNS Tumor"),"molecular_subtype"])
 
 cell_type_proportions_micro_mono<-rbind(cell_type_proportions_micro_mono_init,cell_type_proportions_micro_mono_prog)
 
 # microglia and monocyte cell proportions in initial tumor CNS
 pdf("plots/medullo_micro_mono_init_cells.pdf",width = 12,height = 10)
-ggplot(cell_type_proportions_micro_mono_init,aes(x=Var2,y=value))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~mb_classifier_prediction)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+geom_point(aes(color=tumor_descriptor,shape=tumor_descriptor), size=1,position = position_jitterdodge())+ylim(-0.5,0.5)
+ggplot(cell_type_proportions_micro_mono_init,aes(x=Var2,y=value))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+geom_point(aes(color=tumor_descriptor,shape=tumor_descriptor), size=1,position = position_jitterdodge())+ylim(-0.5,0.5)+ scale_fill_brewer(palette = "Set2")
 dev.off()
 
 tiff("plots/medullo_micro_mono_init_cells.tiff",width = 2000,height = 1600,res=150)
-ggplot(cell_type_proportions_micro_mono_init,aes(x=Var2,y=value))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~mb_classifier_prediction)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+geom_point(aes(color=tumor_descriptor,shape=tumor_descriptor), size=1,position = position_jitterdodge())+ylim(-0.5,0.5)
+ggplot(cell_type_proportions_micro_mono_init,aes(x=Var2,y=value))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+geom_point(aes(color=tumor_descriptor,shape=tumor_descriptor), size=1,position = position_jitterdodge())+ylim(-0.5,0.5)+ scale_fill_brewer(palette = "Set2")
 dev.off()
 
 # black and white
 pdf("plots/medullo_micro_mono_init_cells_bw.pdf",width = 12,height = 10)
-ggplot(cell_type_proportions_micro_mono_init,aes(x=Var2,y=value))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~mb_classifier_prediction)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+scale_fill_grey()+geom_point(aes(shape=tumor_descriptor),size=1 ,position = position_jitterdodge())+ylim(-0.5,0.5)
+ggplot(cell_type_proportions_micro_mono_init,aes(x=Var2,y=value))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+scale_fill_grey()+geom_point(aes(shape=tumor_descriptor),size=1 ,position = position_jitterdodge())+ylim(-0.5,0.5)
 dev.off()
 
 tiff("plots/medullo_micro_mono_init_cells_bw.tiff",width = 2000,height = 1600,res=150)
-ggplot(cell_type_proportions_micro_mono_init,aes(x=Var2,y=value))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~mb_classifier_prediction)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+scale_fill_grey()+geom_point(aes(shape=tumor_descriptor),size=1 ,position = position_jitterdodge())+ylim(-0.5,0.5)
+ggplot(cell_type_proportions_micro_mono_init,aes(x=Var2,y=value))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+scale_fill_grey()+geom_point(aes(shape=tumor_descriptor),size=1 ,position = position_jitterdodge())+ylim(-0.5,0.5)
 dev.off()
 
+# microglia and monocyte cell proportions in subtypes with enough recurrent/progressive and initial tumor CNS
+subtypes_with_prog<-unique(cell_type_proportions_micro_mono_prog$molecular_subtype)
+
+# merge init and prog samples from molecular_subtypes in subtypes_with_prog
+cell_type_proportions_micro_mono_prog<-rbind(cell_type_proportions_micro_mono_prog,cell_type_proportions_micro_mono_init %>% filter(molecular_subtype %in% subtypes_with_prog))
+
+pdf("plots/medullo_micro_mono_init_prog_cells.pdf",width = 20,height = 24)
+ggplot(cell_type_proportions_micro_mono_prog,aes(x=Var2,y=value,shape=tumor_descriptor))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype,ncol = 1)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS and  (>=6) progressive CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+geom_point(aes(color=tumor_descriptor),size=3 ,position = position_jitterdodge())+ylim(-0.5,0.5)+theme(legend.position = "bottom")
+dev.off()
+
+tiff("plots/medullo_micro_mono_init_prog_cells.tiff",width = 3000,height = 3000,res=200)
+ggplot(cell_type_proportions_micro_mono_prog,aes(x=Var2,y=value,shape=tumor_descriptor))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype,ncol = 1)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS and  (>=6) progressive CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+geom_point(aes(color=tumor_descriptor),size=3 ,position = position_jitterdodge())+ylim(-0.5,0.5)
+dev.off()
+
+# black and white
+pdf("plots/medullo_micro_mono_init_prog_cells_bw.pdf",width = 20,height = 24)
+ggplot(cell_type_proportions_micro_mono_prog,aes(x=Var2,y=value,shape=tumor_descriptor))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype,ncol = 1)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS and  (>=6) progressive CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+scale_fill_grey()+geom_point( size=3,position = position_jitterdodge(),color="black")+ylim(-0.5,0.5)+theme(legend.position = "bottom")
+dev.off()
+
+tiff("plots/medullo_micro_mono_init_prog_cells_bw.tiff",width = 3000,height = 3000,res=200)
+ggplot(cell_type_proportions_micro_mono_prog,aes(x=Var2,y=value,shape=tumor_descriptor))+geom_violin(alpha=0.65)+stat_compare_means(size=6)+facet_wrap(~molecular_subtype,ncol = 1)+xlab("cell type")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("Cell proportion of microglia and monocyte in initial tumor CNS and  (>=6) progressive CNS")+ scale_x_discrete(labels= c("Microglia","Monocytes"))+scale_fill_grey()+geom_point( size=3,position = position_jitterdodge(),color="black")+ylim(-0.5,0.5)
+dev.off()
 
 
 
 
 # all brain cells in BRETIGA compared for all subtypes
 # group by mb_classifier_prediction and arrange by value
-cell_type_proportions<-cell_type_proportions %>% group_by(mb_classifier_prediction) %>% arrange(desc(value))
+cell_type_proportions<-cell_type_proportions %>% group_by(molecular_subtype) %>% arrange(desc(value))
 cell_type_proportions$tumor_descriptor[which(cell_type_proportions$tumor_descriptor %in% c("Recurrence","Progressive"))]<-"Progressive/Recurrence"
 
 cell_type_proportions_init<-cell_type_proportions %>% filter(tumor_descriptor =="Initial CNS Tumor")
 cell_type_proportions_prog<-cell_type_proportions %>% filter(tumor_descriptor =="Progressive/Recurrence")  
   
-pdf("plots/medullo_all_brain_cells.pdf",width = 25,height = 10)
-ggplot(cell_type_proportions,aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+geom_bar(stat = "identity")+xlab("Sample")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("All brain cells in BRETIGEA compared for all CNS in subtypes")+theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+guides(fill=guide_legend(title="cell types"))
-dev.off()
 
-tiff("plots/medullo_all_brain_cells.tiff",width = 3500,height = 1200,res=150)
-ggplot(cell_type_proportions,aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+geom_bar(stat = "identity")+xlab("Sample")+ylab("Surrogate proportion variables (SPV)")+theme_Publication()+ggtitle("All brain cells in BRETIGEA compared for all CNS in subtypes")+theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+guides(fill=guide_legend(title="cell types"))
-dev.off()
+Group3 <- ggplot(cell_type_proportions
+                 [which(cell_type_proportions$molecular_subtype=="Group3"),],
+                 aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+
+  geom_bar(stat = "identity")+xlab("Sample")+
+  ylab("Surrogate proportion variables (SPV)")+theme_Publication()+
+  theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+
+  guides(fill=guide_legend(title="cell types"))+ scale_fill_brewer(palette = "Set2")+
+  scale_y_continuous(limits = c(-0.4,1)) +
+  facet_wrap(~molecular_subtype)
 
+Group4 <- ggplot(cell_type_proportions
+                 [which(cell_type_proportions$molecular_subtype=="Group4"),],
+                 aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+
+  geom_bar(stat = "identity")+xlab("Sample")+
+  ylab("Surrogate proportion variables (SPV)")+theme_Publication()+
+  theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+
+  guides(fill=guide_legend(title="cell types"))+ scale_fill_brewer(palette = "Set2")+
+  scale_y_continuous(limits = c(-0.4,1)) +
+  facet_wrap(~molecular_subtype)
+
+SHH <- ggplot(cell_type_proportions
+              [which(cell_type_proportions$molecular_subtype=="SHH"),],
+              aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+
+  geom_bar(stat = "identity")+xlab("Sample")+
+  ylab("Surrogate proportion variables (SPV)")+theme_Publication()+
+  theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+
+  guides(fill=guide_legend(title="cell types"))+ scale_fill_brewer(palette = "Set2")+
+  scale_y_continuous(limits = c(-0.4,1)) +
+  facet_wrap(~molecular_subtype)
+
+WNT <- ggplot(cell_type_proportions
+              [which(cell_type_proportions$molecular_subtype=="WNT"),],
+              aes(x=Var1,y=value,fill=fct_reorder(Var2,value,.desc=TRUE)))+
+  geom_bar(stat = "identity")+xlab("Sample")+
+  ylab("Surrogate proportion variables (SPV)")+theme_Publication()+
+  theme(axis.text.x = element_text(size=12,color="black",face="bold",angle = 90))+
+  guides(fill=guide_legend(title="cell types"))+ scale_fill_brewer(palette = "Set2")+
+  scale_y_continuous(limits = c(-0.4,1))+
+  facet_wrap(~molecular_subtype)
+  
+ggarrange(Group3,Group4,SHH,WNT,nrow = 1,widths = c(1,2,1.25,0.6),common.legend = TRUE,legend = "left") +ggsave("plots/medullo_all_brain_cells.pdf",width = 25,height = 10,units = "in")
+
+ggarrange(Group3,Group4,SHH,WNT,nrow = 1,widths = c(1,2,1.25,0.6),common.legend = TRUE,legend = "left") +ggsave("plots/medullo_all_brain_cells.tiff",width = 25,height = 10,units = "in")
 
 
 write.table(markers_df_brain,"data/analyzed/marker_df_brain.tsv",sep="\t",quote = FALSE,row.names = FALSE)
