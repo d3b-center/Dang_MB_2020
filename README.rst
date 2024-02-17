@@ -1,8 +1,11 @@
 .. |date| date::
 
 *************************
-Mai Dang Medullo Analyses
+Macrophages in SHH subgroup medulloblastoma display dynamic heterogeneity that varies with treatment modality
 *************************
+Mai T Dang, Michael V Gonzalez, Krutika S Gaonkar, Komal S Rathi, Patricia Young, Sherjeel Arif, Li Zhai, Zahidul Alam, Samir Devalaraja, Tsun Ki Jerrick To, Ian W Folkert, Pichai Raman, Jo Lynne Rokita, Daniel Martinez, Jaclyn N Taroni, Joshua A Shapiro, Casey S Greene, Candace Savonen, Fernanda Mafra, Hakon Hakonarson, Tom Curran, Malay Haldar
+
+This study is now published in [Cell Reports](https://pubmed.ncbi.nlm.nih.gov/33789113/).
 
 Immune Deconvolution
 ====================
